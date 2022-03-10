@@ -1,0 +1,807 @@
+<ons-page id="login">
+  <script>
+    const VERSION = "1.0";
+    const eans = [];
+    const counterDisplay = document.querySelector(".count");
+    const eanDisplay = document.querySelector(".display");
+    const eanInput = document.querySelector("#add-ean");
+    const settingsModal = document.querySelector("#settings");
+    let counter = 0;
+    let cotinuousScan = false;
+    const undoEan = {
+      eans: [],
+      index: 0,
+    };
+    let timeoutHidevariable;
+    let timeoutShowvariable;
+    const clearAllTimeout = () => {
+      clearTimeout(timeoutHidevariable);
+      clearTimeout(timeoutShowvariable);
+    };
+    const deleteAll = () => {
+      if (eans.length === 0)
+        return ons.notification.toast("List is already empty", {
+          timeout: 2000,
+        });
+      undoEan.eans = [...eans];
+      undoEan.index = 0;
+      counter = 0;
+      eans.length = 0;
+      backup();
+      display();
+      updateCount();
+
+      clearAllTimeout();
+      if (document.querySelector("#delete-toast").visible) {
+        document.querySelector("#delete-toast").hide();
+        timeoutShowvariable = setTimeout(() => {
+          document.querySelector("#delete-toast").show();
+        }, 300);
+      } else
+        timeoutShowvariable = setTimeout(() => {
+          document.querySelector("#delete-toast").show();
+        }, 300);
+      timeoutHidevariable = setTimeout(() => {
+        if (document.querySelector("#delete-toast").visible)
+          document.querySelector("#delete-toast").hide();
+      }, 6000);
+    };
+
+    const deleteEan = (index) => {
+      // for undo purpose
+      undoEan.eans = [...eans.splice(index, 1)];
+      undoEan.index = index;
+
+      backup();
+      counter = eans.length;
+      display();
+      updateCount();
+      clearAllTimeout();
+      if (document.querySelector("#delete-toast").visible) {
+        document.querySelector("#delete-toast").hide();
+        timeoutShowvariable = setTimeout(() => {
+          document.querySelector("#delete-toast").show();
+        }, 300);
+      } else
+        timeoutShowvariable = setTimeout(() => {
+          document.querySelector("#delete-toast").show();
+        }, 300);
+      timeoutHidevariable = setTimeout(() => {
+        if (document.querySelector("#delete-toast").visible)
+          document.querySelector("#delete-toast").hide();
+      }, 6000);
+    };
+
+    const undo = () => {
+      eans.splice(undoEan.index, 0, ...undoEan.eans);
+      undoEan.eans = [];
+      undoEan.index = -1;
+      clearAllTimeout();
+      if (document.querySelector("#delete-toast").visible)
+        document.querySelector("#delete-toast").hide();
+      backup();
+      counter = eans.length;
+      display();
+      updateCount();
+    };
+
+    const display = () => {
+      eanDisplay.innerHTML = "";
+      eans.forEach((ean, index) => {
+        const li = document.createElement("ons-list-item");
+        li.setAttribute("modifier", "longdivider");
+
+        // removing the serial number from display
+        const left = document.createElement("div");
+        left.classList.add("left");
+        // left.innerHTML = index + 1 + ".";
+
+        const center = document.createElement("div");
+        center.classList.add("center", "pr-1");
+        if (ean.title)
+          center.innerHTML = `<ons-col width="80%">
+
+                                <ons-col class="pr-1 pl-1 pb-1 pt-1">${ean.title}</ons-col>
+                                <ons-col class="pr-1 pl-1 pb-1 "><small>${ean.ean}</small></ons-col>
+
+                              </ons-col>
+                              <ons-col width="20%">${ean.qnty}</ons-col>`;
+        else
+          center.innerHTML = `<ons-col width="80%">
+                                <ons-col class="pr-1 pl-1 pb-1 pt-1">${ean.ean}</ons-col>
+                              </ons-col>
+                              <ons-col width="20%">${ean.qnty}</ons-col>`;
+
+        center.onclick = function () {
+          showEan(ean);
+        };
+        const right = document.createElement("div");
+        right.classList.add("right", "pr-0", "action-buttons");
+
+        const icon = document.createElement("div");
+        icon.innerHTML = `<ons-icon class="p-1" style="color: #2979ff;" icon = "fa-times-circle"></ons-icon>`;
+
+        icon.onclick = function () {
+          deleteEan(index);
+        };
+
+        right.appendChild(icon);
+
+        li.appendChild(left);
+        li.appendChild(center);
+        li.appendChild(right);
+
+        eanDisplay.appendChild(li);
+      });
+    };
+
+    const updateCount = () => {
+      counterDisplay.innerHTML = eans.length;
+    };
+
+    const backup = () => {
+      localStorage.setItem("eans", JSON.stringify(eans));
+    };
+
+    const restore = () => {
+      document.getElementById("subject-email").value =
+        localStorage.getItem("emailSubject");
+      document.getElementById("to-email").value =
+        localStorage.getItem("emailTo");
+
+      if (!localStorage.getItem("eans") || localStorage.getItem("eans") === "")
+        return;
+
+      // const oldData = localStorage.getItem("eans").split(",");
+      let oldData;
+      try {
+        oldData = JSON.parse(localStorage.getItem("eans"));
+      } catch (error) {
+        localStorage.setItem("eans", JSON.stringify([]));
+        oldData = JSON.parse(localStorage.getItem("eans"));
+      }
+
+      oldData.forEach((data) => {
+        eans.push(data);
+      });
+
+      updateCount();
+      display();
+    };
+
+    const indicateCorrectEan = () => {
+      const data = eanInput.value;
+      if (!data || isNaN(data) || data.length !== 13) {
+        eanInput.classList.add("danger");
+        eanInput.classList.remove("success");
+
+        return;
+      }
+
+      eanInput.classList.remove("danger");
+      eanInput.classList.add("success");
+    };
+    const resetIndicateCorrectEan = () => {
+      eanInput.classList.remove("success");
+      eanInput.classList.remove("danger");
+    };
+
+    const addEanManually = () => {
+      const data = eanInput.value;
+      if (!data || isNaN(data))
+        return ons.notification.toast("please check your data", {
+          timeout: 2000,
+        });
+      if (data.length !== 13)
+        return ons.notification.toast("EAN must be an 13 digit number", {
+          timeout: 2000,
+        });
+
+      const repeating = eans.filter((ean) => {
+        return ean.ean == data;
+      });
+      if (repeating.length != 0)
+        return ons.notification.toast("sorry, Item already exist ....!", {
+          timeout: 2000,
+        });
+      const template = {
+        title: "",
+        ean: data,
+        qnty: 0,
+      };
+      eans.push(template);
+      // eans.push(data);
+      backup();
+      updateCount();
+      display();
+      ons.notification.toast("Entry added...", {
+        timeout: 2000,
+      });
+      eanInput.value = "";
+      resetIndicateCorrectEan();
+      eanInput.focus();
+    };
+
+    const scan = () => {
+      cordova.plugins.barcodeScanner.scan(
+        function (result) {
+          if (result.cancelled)
+            return ons.notification.toast("Last scan was cannencelled....!", {
+              timeout: 2000,
+            });
+
+          if (!result.text)
+            return ons.notification.toast("Last scan was failed....!", {
+              timeout: 2000,
+            });
+
+          if (result.text.length !== 13)
+            return ons.notification.toast(
+              "Last scan has an error please try again....!",
+              {
+                timeout: 2000,
+              }
+            );
+
+          const repeating = eans.filter((ean) => {
+            return ean.ean == result.text;
+          });
+          // console.log(repeating);
+
+          if (repeating.length !== 0)
+            return ons.notification.toast("sorry, Item already exist ....!", {
+              timeout: 2000,
+            });
+
+          const template = {
+            title: "",
+            ean: result.text,
+            qnty: 0,
+          };
+          eans.push(template);
+          // eans.push(result.text);
+          backup();
+          updateCount();
+          display();
+          ons.notification.toast("Scan compleated...", {
+            timeout: 2000,
+          });
+          if (cotinuousScan) setTimeout(scan, 500);
+        },
+        function (error) {
+          alert("Scanning failed: " + error);
+        }
+      );
+    };
+    // display ean dialogue
+    const showEan = function (ean) {
+      if (!ean) return;
+
+      document.getElementById("ean-input").value = ean.ean;
+      document.getElementById("title-input").value = ean.title;
+      document.getElementById("qnty-input").value = ean.qnty;
+      document.getElementById("ean-input").onchange = (e) => {
+        ean.ean = parseInt(e.target.value);
+        backup();
+        updateCount();
+        display();
+        JsBarcode("#barcode", ean.ean);
+      };
+
+      document.getElementById("title-input").onchange = (e) => {
+        ean.title = e.target.value;
+        backup();
+        updateCount();
+        display();
+      };
+
+      document.getElementById("qnty-input").onchange = (e) => {
+        ean.qnty = parseInt(e.target.value);
+        backup();
+        updateCount();
+        display();
+      };
+
+      const dialog = document.getElementById("ean-display");
+      JsBarcode("#barcode", ean.ean);
+      dialog.show();
+    };
+
+    // share
+
+    const share = () => {
+      document.querySelector("#share").show();
+    };
+
+    const closeShare = () => {
+      document.querySelector("#share").hide();
+    };
+    // function for share
+    const more = () => {
+      if (eans.length === 0)
+        return ons.notification.toast("List is empty", {
+          timeout: 2000,
+        });
+
+      const rows = eans.map((ean) => {
+        return `${ean.title}  ${ean.ean}  ${ean.qnty}`;
+      });
+      const resultEans = rows.join("\n");
+      const subject = getSubject();
+      var options = {
+        message: resultEans, // not supported on some apps (Facebook, Instagram)
+        subject: subject, // fi. for email
+        // files: ["", ""], // an array of filenames either locally or remotely
+        // url: "https://www.website.com/foo/#bar?a=b",
+        chooserTitle: "Pick an app", // Android only, you can override the default share sheet title
+        // appPackageName: "com.apple.social.facebook", // Android only, you can provide id of the App you want to share with
+        // iPadCoordinates: "0,0,0,0", //IOS only iPadCoordinates for where the popover should be point.  Format with x,y,width,height
+      };
+
+      var onSuccess = function (result) {
+        // console.log("Share completed? " + result.completed); // On Android apps mostly return false even while it's true
+        // console.log("Shared to app: " + result.app); // On Android result.app since plugin version 5.4.0 this is no longer empty. On iOS it's empty when sharing is cancelled (result.completed=false)
+      };
+
+      var onError = function (msg) {
+        // console.log("Sharing failed with message: " + msg);
+        ons.notification.toast("Faild to share", {
+          timeout: 2000,
+        });
+      };
+
+      window.plugins.socialsharing.shareWithOptions(
+        options,
+        onSuccess,
+        onError
+      );
+      closeShare();
+    };
+
+    const getSubject = () => {
+      const sub = localStorage.getItem("emailSubject");
+      if (!sub) return "";
+      return sub;
+    };
+    const getTo = () => {
+      const to = localStorage.getItem("emailTo");
+      if (!to) return [];
+      let addresses = to.split(",");
+      return addresses;
+    };
+    const email = () => {
+      if (eans.length === 0)
+        return ons.notification.toast("List is empty!", {
+          timeout: 2000,
+        });
+
+      const rows = eans.map((ean) => {
+        return `${ean.title}  ${ean.ean}  ${ean.qnty}`;
+      });
+      const resultEans = rows.join("\n");
+
+      window.plugins.socialsharing.shareViaEmail(
+        resultEans, // can contain HTML tags, but support on Android is rather limited:  http://stackoverflow.com/questions/15136480/how-to-send-html-content-with-image-through-android-default-email-client
+        null, // getSubject(),
+        null, //getTo(), // TO: must be null or an array
+        null, // CC: must be null or an array
+        null, // BCC: must be null or an array
+        null, // FILES: can be null, a string, or an array
+        (result) => console.log(result), // called when sharing worked, but also when the user cancelled sharing via email. On iOS, the callbacks' boolean result parameter is true when sharing worked, false if cancelled. On Android, this parameter is always true so it can't be used). See section "Notes about the successCallback" below.
+        (err) => {
+          console.log(err); // called when sh*t hits the fan
+          ons.notification.toast("Faild to email", {
+            timeout: 2000,
+          });
+        }
+      );
+      closeShare();
+    };
+
+    const copy = () => {
+      if (eans.length === 0)
+        return ons.notification.toast("List is empty!", {
+          timeout: 2000,
+        });
+
+      const rows = eans.map((ean) => {
+        return `${ean.title}  ${ean.ean}  ${ean.qnty}`;
+      });
+      const resultEans = rows.join("\n");
+      // console.log(resultEans);
+      cordova.plugins.clipboard.copy(resultEans);
+      ons.notification.toast("Copied!", {
+        timeout: 2000,
+      });
+      closeShare();
+    };
+    const sharePdf = () => {
+      let tabledEans = eans.map((ean) => {
+        return `<tr><td style="padding:1rem;">${ean.title}</td><td style="padding:1rem;">${ean.ean}</td><td style="padding:1rem;">${ean.qnty}</td></tr>`;
+      });
+      tabledEans = `<table>
+        <tr style="text-align:left">
+          <th style="padding:1rem;">Title</th>
+          <th style="padding:1rem;">EAN</th>
+          <th style="padding:1rem;">Quantity</th>
+        </tr>
+        ${tabledEans.join("\n")}
+        </table>`;
+      let options = {
+        documentSize: "A4",
+        type: "base64",
+      };
+
+      pdf
+        .fromData(tabledEans, options)
+        .then((base64) => {
+          window.plugins.socialsharing.share(
+            "pdf",
+            "Scanned",
+            "data:application/pdf;base64," + base64,
+            null
+          );
+        }) // returns base64:JVBERi0xLjQKJdPr6eEKMSAwIG9iago8PC9DcmVh...
+        .catch((err) => console.err(err));
+      ons.notification.toast("Share as pdf", {
+        timeout: 2000,
+      });
+      closeShare();
+    };
+
+    const saveXls = () => {
+      data = eans;
+      var wb = XLSX.utils.book_new();
+      wb.Props = {
+        Title: "Scanned with barcodeScanner",
+        Subject: "Scanned Eans",
+        Author: "BarcodeScanner",
+        CreatedDate: Date.now(),
+      };
+      wb.SheetNames.push("sheet 1");
+
+      let tabledEans = eans.map((ean) => {
+        return [ean.title, ean.ean, ean.qnty];
+      });
+      var ws_data = [["Title", "EAN", "Quantity"], ...tabledEans]; //a row with 2 columns
+
+      var ws = XLSX.utils.aoa_to_sheet(ws_data);
+      wb.Sheets["sheet 1"] = ws;
+      var wbout = XLSX.write(wb, { bookType: "xlsx", type: "base64" });
+
+      window.plugins.socialsharing.share(
+        "export",
+        `barcodeScanner_${Date.now()}`, //octet-stream
+        "data:application/xlsx;base64," + wbout,
+        null
+      );
+      ons.notification.toast("Share as spreadsheet", {
+        timeout: 2000,
+      });
+      closeShare();
+    };
+
+    // settings
+    const settings = () => {
+      settingsModal.show();
+    };
+
+    const closeSettings = () => {
+      settingsModal.hide();
+    };
+    const saveSettings = () => {
+      const to = document.querySelector("#to-email").value;
+      const sub = document.querySelector("#subject-email").value;
+
+      localStorage.setItem("emailTo", to);
+
+      localStorage.setItem("emailSubject", sub);
+
+      ons.notification.toast("Settings has been Saved!", {
+        timeout: 2000,
+      });
+    };
+
+    // checking for update
+    // xhttp request function
+    function httpGetAsync(theUrl, callback) {
+      var xmlHttp = new XMLHttpRequest();
+      xmlHttp.onreadystatechange = function () {
+        if (xmlHttp.readyState == 4 && xmlHttp.status == 200)
+          callback(xmlHttp.responseText);
+      };
+      xmlHttp.open("GET", theUrl, true); // true for asynchronous
+      // xmlHttp.setRequestHeader("cookie", localStorage.testCookie);
+      xmlHttp.withCredentials = true;
+      xmlHttp.send(null);
+    }
+
+    //http request if android
+    function androidHttp() {
+      cordova.plugin.http.setHeader(
+        "http://www.gameinfo.online",
+        "Header",
+        "Value"
+      );
+      cordova.plugin.http.get(
+        "http://www.gameinfo.online/apps/barcodescanner.php",
+        {},
+        { Authorization: "OAuth2: token" },
+        function (response) {
+          // console.log(response.status);
+          // console.log(response);
+          responseForUpdateCheck(response.data);
+        },
+        function (response) {
+          console.error(response.error);
+        }
+      );
+    }
+
+    const responseForUpdateCheck = (response) => {
+      try {
+        let updateinfo = JSON.parse(response);
+        if (updateinfo.version !== VERSION) {
+          console.log("update found");
+          document.getElementById("update-modal").innerHTML =
+            updateinfo.innerHTML;
+          document.getElementById("update-modal").show();
+          localStorage.update = "true";
+          localStorage.version = updateinfo.version;
+          localStorage.updateInnerHtml = updateinfo.innerHTML;
+        } else {
+          console.log("latest version");
+          localStorage.update = "false";
+          localStorage.version = updateinfo.version;
+          localStorage.updateInnerHtml = updateinfo.innerHTML;
+          document.getElementById("update-modal").hide();
+        }
+      } catch {
+        var parser = new DOMParser();
+        var htmlDoc = parser.parseFromString(response, "text/html");
+        script = htmlDoc.querySelectorAll("script");
+        starting = script[1].innerHTML.indexOf("document.cookie");
+        if (starting != -1) {
+          script[1].innerHTML = script[1].innerHTML.replace(
+            script[1].innerHTML.substring(starting, script[1].innerHTML.length),
+            ""
+          );
+          script[1].innerHTML += "toHex(slowAES.decrypt(c, 2, a, b));";
+          token = eval(script[1].innerHTML);
+
+          if (ons.platform.isAndroid(true)) {
+            cordova.plugin.http.setCookie(
+              "http://www.gameinfo.online",
+              "__test=" + token,
+              {}
+            );
+            androidHttp();
+          } else {
+            document.cookie =
+              "__test=" +
+              token +
+              "; expires=Thu, 01 Jan 1970 00:00:01 GMT; path=/";
+            document.cookie =
+              "__test=" +
+              token +
+              "; expires=Thu, 31-Dec-37 23:55:55 GMT " +
+              ";domain=.gameinfo.online;path=/";
+
+            theUrl = "http://www.gameinfo.online/apps/barcodescanner.php";
+            localStorage.testCookie = `__test=${token}`;
+            httpGetAsync(theUrl, responseForUpdateCheck);
+          }
+        }
+      }
+    };
+    // if update is found never allow user to use app
+    const updateAppChecker = () => {
+      if (!localStorage.version) return; // if running for the first time no data will be there
+      if (VERSION >= localStorage.version) {
+        document.getElementById("update-modal").hide();
+        return;
+      }
+      document.getElementById("update-modal").innerHTML =
+        localStorage.updateInnerHtml;
+      document.getElementById("update-modal").show();
+    };
+
+    // this function will be called when onsen start to rendder this page
+    ons.getScriptPage().onInit = async function () {
+      restore();
+      eanInput.oninput = indicateCorrectEan;
+
+      document.querySelector("#settings").onDeviceBackButton = function () {
+        document.querySelector("#settings").hide();
+      };
+      document.querySelector("#ean-display").onDeviceBackButton = function () {
+        document.querySelector("#ean-display").hide();
+      };
+      document.querySelector("#share").onDeviceBackButton = function () {
+        document.querySelector("#share").hide();
+      };
+
+      document
+        .querySelector("#continueScanSwitch")
+        .addEventListener("change", function (e) {
+          cotinuousScan = e.value;
+        });
+      this.onShow = async function () {
+        // check for update
+        if (ons.platform.isAndroid(true)) {
+          setTimeout(() => androidHttp(), 5000);
+        } else {
+          theUrl = "http://www.gameinfo.online/apps/barcodescanner.php";
+          httpGetAsync(theUrl, responseForUpdateCheck);
+        }
+      };
+
+      // check update info available locally
+      updateAppChecker();
+    };
+  </script>
+
+  <div class="container">
+    <div class="result">
+      <div class="badge">
+        <div>Scanned : <span class="count">0</span></div>
+        <div style="display: flex">
+          <ons-button
+            class="settings"
+            ripple="false"
+            modifier="quiet"
+            onclick="deleteAll()"
+          >
+            <!-- <ons-icon icon="md-format-clear-all"></ons-icon> -->
+            <ons-icon icon="fa-trash"></ons-icon>
+          </ons-button>
+
+          <ons-button
+            class="settings"
+            ripple="false"
+            modifier="quiet"
+            onclick="share()"
+          >
+            <ons-icon icon="md-share"></ons-icon>
+          </ons-button>
+          <div class="relatedToEmail">
+            <ons-button
+              class="settings"
+              ripple="false"
+              modifier="quiet"
+              onclick="settings()"
+            >
+              <ons-icon icon="md-settings"></ons-icon>
+            </ons-button>
+          </div>
+        </div>
+      </div>
+      <ons-list class="display"> </ons-list>
+    </div>
+
+    <p class="add-ean-field">
+      <input type="number" name="add-ean" id="add-ean" class="add-ean" />
+      <ons-button class="add-ean-button" onclick="addEanManually()">
+        <ons-icon icon="md-plus"></ons-icon>
+      </ons-button>
+    </p>
+    <div class="scan-button">
+      <div class="loopButton">
+        <div class="pr-1">Scan loop</div>
+        <div class="pr-1">
+          <ons-switch id="continueScanSwitch"></ons-switch>
+        </div>
+      </div>
+
+      <ons-button modifier="" onclick="scan()">
+        <ons-icon icon="fa-barcode"></ons-icon>
+        scan
+      </ons-button>
+    </div>
+  </div>
+
+  <!-- modal for settings -->
+  <ons-modal
+    id="settings"
+    animation="fade"
+    animation-options="{duration: 0.2, delay: 0.1, timing: 'ease-in'}"
+  >
+    <div class="settings-container">
+      <div class="close">
+        <ons-icon onclick="closeSettings()" icon="md-close-circle"></ons-icon>
+      </div>
+      <div class="settings-menu">
+        <p class="pb-4">Email Settings</p>
+        <div class="settings-option">
+          <label>To</label>
+          <input type="text" class="settings-input" id="to-email" />
+          <small style="color: darkgray"
+            >Use "," to separate multiple email addresses.</small
+          >
+        </div>
+        <div class="settings-option">
+          <label>Subject</label>
+          <input type="text" class="settings-input" id="subject-email" />
+        </div>
+        <p class="scan-button">
+          <ons-button modifier="large" onclick="saveSettings()">
+            save settings
+          </ons-button>
+        </p>
+      </div>
+    </div>
+  </ons-modal>
+  <!-- settings modal end here  -->
+
+  <!-- uan display dialogue -->
+  <ons-dialog id="ean-display" cancelable>
+    <div style="text-align: center; padding: 10px">
+      <svg id="barcode" style="max-width: 100%"></svg>
+      <!-- <canvas id="barcode"></canvas> -->
+    </div>
+    <div class="item-proprties">
+      <ons-input
+        id="ean-input"
+        modifier="underbar"
+        placeholder="EAN"
+        type="number"
+        float
+      ></ons-input>
+      <ons-input
+        id="qnty-input"
+        type="number"
+        modifier="underbar"
+        placeholder="Quantity"
+        float
+      ></ons-input>
+      <ons-input
+        id="title-input"
+        modifier="underbar"
+        placeholder="Title"
+        float
+      ></ons-input>
+    </div>
+  </ons-dialog>
+
+  <!-- share dialog -->
+  <ons-dialog id="share" cancelable>
+    <div class="share-options">
+      <div>
+        <ons-button onclick="copy()">
+          <ons-icon icon="md-copy"></ons-icon>
+        </ons-button>
+      </div>
+
+      <div class="relatedToEmail">
+        <ons-button onclick="email()">
+          <ons-icon icon="md-email"></ons-icon>
+        </ons-button>
+      </div>
+      <div>
+        <ons-button onclick="sharePdf()">
+          <ons-icon icon="fa-file-pdf-o"></ons-icon>
+        </ons-button>
+      </div>
+      <div>
+        <ons-button onclick="saveXls()">
+          <ons-icon icon="md-grid"></ons-icon
+          ><small style="font-size: 50%">.xlsx</small>
+        </ons-button>
+      </div>
+      <div>
+        <ons-button onclick="more()">
+          <ons-icon icon="fa-ellipsis-h"></ons-icon>
+        </ons-button>
+      </div>
+    </div>
+  </ons-dialog>
+  <ons-toast
+    id="delete-toast"
+    animation="ascend"
+    animation-options="{duration: 0.2, delay: 0, timing: 'ease-in'}"
+  >
+    Deleted
+    <button onclick="undo()">Undo</button>
+  </ons-toast>
+  <ons-modal direction="up" id="update-modal"> </ons-modal>
+</ons-page>

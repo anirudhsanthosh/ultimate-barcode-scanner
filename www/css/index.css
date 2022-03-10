@@ -1,0 +1,254 @@
+* {
+  -webkit-tap-highlight-color: rgba(
+    0,
+    0,
+    0,
+    0
+  ); /* make transparent link selection, adjust last value opacity 0 to 1.0 */
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+
+body {
+  -webkit-touch-callout: none; /* prevent callout to copy image, etc when tap to hold */
+  -webkit-text-size-adjust: none; /* prevent webkit from resizing text to fit */
+  -webkit-user-select: none; /* prevent copy paste, to allow, change 'none' to 'text' */
+  user-select: none;
+  background-color: #e4e4e4;
+  background-image: linear-gradient(top, #a7a7a7 0%, #e4e4e4 51%);
+  font-family: system-ui, -apple-system, -apple-system-font, "Segoe UI",
+    "Roboto", sans-serif;
+  font-size: 12px;
+  height: 100vh;
+  margin: 0px;
+  padding: 0px;
+  /* Padding to avoid the "unsafe" areas behind notches in the screen */
+  padding: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px)
+    env(safe-area-inset-bottom, 0px) env(safe-area-inset-right, 0px);
+  text-transform: none;
+  width: 100%;
+}
+
+@keyframes fade {
+  from {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@-webkit-keyframes fade {
+  from {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.blink {
+  animation: fade 3000ms infinite;
+  -webkit-animation: fade 3000ms infinite;
+}
+.pr-0 {
+  padding-right: 0rem !important;
+}
+.p-1 {
+  padding: 0.5rem;
+}
+.pl-1 {
+  padding-left: 0.5rem;
+}
+.pt-1 {
+  padding-top: 0.5rem;
+}
+.pb-1 {
+  padding-bottom: 0.5rem;
+}
+.pr-1 {
+  padding-right: 0.5rem;
+}
+
+.action-buttons {
+  font-size: 120%;
+  color: #2979ff;
+}
+.container {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  flex-direction: column;
+}
+.result {
+  height: 100%;
+  max-height: 100%;
+  overflow-y: hidden;
+  width: 100%;
+  padding: 0rem 0rem;
+}
+.badge {
+  display: flex;
+  align-items: center;
+  font-size: 120%;
+  font-weight: bold;
+  padding: 0.5rem;
+  justify-content: space-between;
+}
+.scan-button {
+  padding: 1rem 1.5rem 1.5rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.action-button {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.5rem 0.75rem;
+}
+.display {
+  /* display: flex;
+  flex-direction: column; */
+  background: #eceff1;
+  height: 90%;
+  max-height: 100%;
+  overflow-y: scroll;
+  padding: 0 0.5rem;
+  font-size: 110%;
+  border: 1px solid #d5d5d5;
+  border-left: none;
+  border-right: none;
+}
+
+/* overriding list style */
+.list-item--material {
+  padding: 0 0 0 0 !important;
+}
+
+.add-ean-field {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.5rem 1.5rem;
+}
+
+.add-ean {
+  width: 85%;
+  border: 1px solid #444242;
+  font: inherit;
+  background: #e6e4e4;
+  user-select: none;
+  border-radius: 3px;
+  font-family: Roboto, Noto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  line-height: 36px;
+  font-size: 14px;
+  -webkit-transform: translate3d(0, 0, 0);
+  transform: translate3d(0, 0, 0);
+  color: rgb(0 0 0);
+  font-weight: 500;
+  opacity: 1;
+}
+
+.add-ean-button {
+  max-width: 15%;
+}
+
+.success {
+  border-color: rgb(13, 148, 13);
+}
+.danger {
+  border-color: rgb(224, 23, 9);
+}
+.settings {
+  margin-left: auto;
+}
+
+.settings-container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.close {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  font-size: 200%;
+}
+
+.settings-menu {
+  width: 90%;
+  height: 80%;
+  background: #fff;
+  border-radius: 10px;
+  color: #000;
+  padding: 0.5rem;
+}
+
+.settings-input {
+  width: 100%;
+  line-height: 30px;
+}
+
+.settings-option {
+  padding-bottom: 1rem;
+}
+.settings-menu label {
+  display: inline-block;
+  width: 100%;
+  text-align: left;
+  padding-bottom: 0.5rem;
+}
+.pb-4 {
+  padding-bottom: 1rem;
+}
+
+.share-options {
+  display: flex;
+  justify-content: space-evenly;
+  /* padding: 2rem 0rem; */
+  flex-wrap: wrap;
+}
+
+.share-options > div {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-grow: 1;
+  width: 33%;
+  height: 100px;
+}
+.item-proprties {
+  padding: 1rem;
+}
+.item-proprties ons-input {
+  width: 100%;
+  margin-bottom: 1.5rem;
+}
+.loopButton {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+:checked + .switch--material__toggle > .switch--material__handle {
+  left: 16px;
+  background-color: #2979ff;
+}
+
+:checked + .switch--material__toggle {
+  background-color: rgb(41 121 255 / 50%);
+  box-shadow: none;
+}
+.hide {
+  display: none !important;
+}
