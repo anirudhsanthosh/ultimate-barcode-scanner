@@ -1,37 +1,12 @@
 document.addEventListener("init", function (event) {
   console.log("init called");
 });
+
 const loadPage = (page) => {
   document.querySelector("#menu").close();
   document
     .querySelector("#navigator")
     .bringPageTop(page, { animation: "fade" });
-};
-
-let banner;
-const bannerAd = async () => {
-  await admob.start();
-  banner = new admob.BannerAd({
-    adUnitId: "ca-app-pub-5110048089130214/9608747154", //"ca-app-pub-3940256099942544/6300978111", //'ca-app-pub-5110048089130214/9608747154',
-  });
-  banner.on("impression", async (evt) => {
-    // await banner.hide();
-    console.log("impression done");
-  });
-  await banner.show();
-
-  document.addEventListener("admob.banner.size", async (event) => {
-    console.log("resize ad", event);
-  });
-  document.addEventListener("admob.banner.load", async (event) => {
-    console.log("load ad", event);
-  });
-  document.addEventListener("admob.banner.loadfail", async (event) => {
-    console.log("loadfail ad", event);
-  });
-  document.addEventListener("admob.banner.impression", async (event) => {
-    console.log("impression ad", event);
-  });
 };
 
 function b64toBlob(b64Data, contentType, sliceSize) {
@@ -88,9 +63,8 @@ function savebase64AsPDF(folderpath, filename, content, contentType) {
     });
   });
 }
-ons.ready(async () => {
-  bannerAd();
 
+ons.ready(async () => {
   if (ons.platform.isAndroid(true)) {
     setTimeout(() => {
       // check share via email option available or not if no hide all email related contents
@@ -107,3 +81,10 @@ ons.ready(async () => {
     });
   }
 });
+
+function copyToClipboard(text) {
+  const input = document.querySelector(".copyArea");
+  input.value = text;
+  input.select();
+  document.execCommand("copy");
+}

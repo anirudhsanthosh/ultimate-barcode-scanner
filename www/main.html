@@ -18,6 +18,7 @@
       clearTimeout(timeoutHidevariable);
       clearTimeout(timeoutShowvariable);
     };
+
     const deleteAll = () => {
       if (eans.length === 0)
         return ons.notification.toast("List is already empty", {
@@ -323,6 +324,16 @@
           timeout: 2000,
         });
 
+      if (!ons.platform.isAndroid(true)) {
+        ons.notification.toast(
+          "Share  option is not implemented in web demo, it is  available in android app",
+          {
+            timeout: 50000,
+          }
+        );
+        return;
+      }
+
       const rows = eans.map((ean) => {
         return `${ean.title}  ${ean.ean}  ${ean.qnty}`;
       });
@@ -375,6 +386,15 @@
           timeout: 2000,
         });
 
+      if (!ons.platform.isAndroid(true)) {
+        ons.notification.toast(
+          "Email option is not implemented in web demo, it is  available in android app",
+          {
+            timeout: 50000,
+          }
+        );
+        return;
+      }
       const rows = eans.map((ean) => {
         return `${ean.title}  ${ean.ean}  ${ean.qnty}`;
       });
@@ -408,14 +428,26 @@
         return `${ean.title}  ${ean.ean}  ${ean.qnty}`;
       });
       const resultEans = rows.join("\n");
-      // console.log(resultEans);
-      cordova.plugins.clipboard.copy(resultEans);
+      if (ons.platform.isAndroid(true))
+        cordova.plugins.clipboard.copy(resultEans);
+      else copyToClipboard(resultEans);
+
       ons.notification.toast("Copied!", {
         timeout: 2000,
       });
       closeShare();
     };
     const sharePdf = () => {
+      if (!ons.platform.isAndroid(true)) {
+        ons.notification.toast(
+          "Share pdf option is not implemented in web demo, it is only available in android app",
+          {
+            timeout: 50000,
+          }
+        );
+        return;
+      }
+
       let tabledEans = eans.map((ean) => {
         return `<tr><td style="padding:1rem;">${ean.title}</td><td style="padding:1rem;">${ean.ean}</td><td style="padding:1rem;">${ean.qnty}</td></tr>`;
       });
@@ -468,13 +500,15 @@
       var ws = XLSX.utils.aoa_to_sheet(ws_data);
       wb.Sheets["sheet 1"] = ws;
       var wbout = XLSX.write(wb, { bookType: "xlsx", type: "base64" });
+      if (ons.platform.isAndroid(true))
+        window.plugins.socialsharing.share(
+          "export",
+          `barcodeScanner_${Date.now()}`, //octet-stream
+          "data:application/xlsx;base64," + wbout,
+          null
+        );
+      else XLSX.writeFile(wb, "out.xlsb");
 
-      window.plugins.socialsharing.share(
-        "export",
-        `barcodeScanner_${Date.now()}`, //octet-stream
-        "data:application/xlsx;base64," + wbout,
-        null
-      );
       ons.notification.toast("Share as spreadsheet", {
         timeout: 2000,
       });
