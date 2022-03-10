@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style>
+      .container {
+        display: flex;
+        align-items: center;
+        justify-content: space-around;
+        overflow-y: auto;
+      }
+      .frame {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        /* height: 90vh; */
+        width: calc(90vh * 0.4713445995591477);
+        z-index: -10;
+      }
+      .content {
+        height: calc(90vh - 6rem);
+        width: calc((90vh - 4.2rem) * 0.4713445995591477);
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        border: 0px solid transparent;
+        border-radius: 10px;
+        overflow: visible;
+      }
+      .left {
+        position: relative;
+        width: 50vw;
+        height: 100vh;
+      }
+      button > svg {
+        width: 20px;
+        height: 20px;
+      }
+
+      .copy {
+        width: 30px;
+        height: 30px;
+        padding: 4px;
+        margin-left: auto;
+        background: transparent;
+        border: 1px solid rgba(255, 255, 255, 0.8);
+        border-radius: 5px;
+      }
+
+      button.copy:hover {
+        fill: #2196f3;
+        background: #fff;
+        cursor: pointer;
+      }
+      .field {
+        display: flex;
+        align-items: center;
+        justify-content: space-around;
+        padding: 0 0.5rem;
+        /* background: #f1f1f1; */
+        margin-bottom: 1rem;
+        border-radius: 5px;
+        border: 1px solid #a5a5a5;
+        box-shadow: 1px 5px 18px -13px rgb(0 0 0 / 50%);
+        position: relative;
+        background: #2196f3;
+        color: #fff;
+      }
+      h4 > span {
+        padding: 1rem;
+      }
+
+      h4 > label {
+        font-size: 60%;
+        text-transform: capitalize;
+        position: absolute;
+        top: 0.25rem;
+        letter-spacing: 1px;
+      }
+      .title {
+        color: #2196f3;
+      }
+      a {
+        background: #2196f300;
+        text-decoration: none;
+        padding: 1rem 0.5rem;
+        border: 1px solid #2196f3;
+        margin-top: 1rem;
+        border-radius: 5px;
+        color: #2196f3;
+        text-transform: uppercase;
+        font-size: 90%;
+        font-weight: bold;
+        transition: 0.3s all;
+        box-shadow: 0px 6px 20px -11px rgb(0 0 0 / 50%);
+      }
+
+      a:focus,
+      a:hover {
+        background: #2196f3;
+        color: #fff;
+        box-shadow: 0px 18px 21px -10px rgb(0 0 0 / 50%);
+      }
+      @media (max-width: 700px) {
+        .container {
+          flex-direction: column;
+        }
+      }
+
+      /* override */
+
+      .frame {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        /* height: 90vh; */
+        width: 400px;
+        z-index: -10;
+      }
+      .content {
+        height: 720px;
+        width: 358px;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50.4%, -49.5%);
+        border: 0px solid transparent;
+        border-radius: 10px;
+        overflow: visible;
+        opacity: 1;
+      }
+      .scalingDiv {
+        transform: scale(0.75);
+      }
+      .left {
+        position: relative;
+        width: 50vw;
+        height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="left">
+        <div class="scalingDiv">
+          <img class="frame" src="images/pixel x2 frame.png" />
+          <iframe
+            scrolling="yes"
+            class="content"
+            src="http://anirudh.rf.gd/barcodeScanner/?platform=android"
+          ></iframe>
+        </div>
+      </div>
+      <div>
+        <h2 class="title">Sample Data</h2>
+        <div class="field">
+          <h4><label>username</label> <span class="user">customer</span></h4>
+          <button class="copy"></button>
+        </div>
+        <div class="field">
+          <h4>
+            <label>password</label>
+            <span class="pass">@JIp%@mYCHv0C*JnKoH!svMO</span>
+          </h4>
+          <button class="copy"></button>
+        </div>
+        <div class="field">
+          <h4>
+            <label>email</label>
+            <span class="email">customer@shoper.rf.gd</span>
+          </h4>
+          <button class="copy"></button>
+        </div>
+        <div class="field">
+          <h4>
+            <label>card number</label>
+            <span class="user">4111 1111 1111 1111</span>
+          </h4>
+          <button class="copy"></button>
+        </div>
+        <div class="field">
+          <h4><label>CVV</label> <span class="cvv"></span></h4>
+          <button class="copy"></button>
+        </div>
+        <div class="field">
+          <h4><label>Expiry Date</label> <span class="exp"></span></h4>
+          <button class="copy"></button>
+        </div>
+        <div style="padding: 1rem 0rem">
+          <a href="http://anirudh.rf.gd/barcodeScanner/?platform=android">
+            view without frame</a
+          >
+        </div>
+      </div>
+    </div>
+    <script>
+      const checkIcon = `<svg version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+                        width="405.272px" height="405.272px" viewBox="0 0 405.272 405.272" style="enable-background:new 0 0 405.272 405.272;"
+                        xml:space="preserve"><g><path d="M393.401,124.425L179.603,338.208c-15.832,15.835-41.514,15.835-57.361,0L11.878,227.836
+                          c-15.838-15.835-15.838-41.52,0-57.358c15.841-15.841,41.521-15.841,57.355-0.006l81.698,81.699L336.037,67.064
+                          c15.841-15.841,41.523-15.829,57.358,0C409.23,82.902,409.23,108.578,393.401,124.425z"/></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g>`;
+
+      const copyIcon = `<svg
+              version="1.1"
+              id="Capa_1"
+              xmlns="http://www.w3.org/2000/svg"
+              xmlns:xlink="http://www.w3.org/1999/xlink"
+              x="0px"
+              y="0px"
+              viewBox="0 0 330 330"
+              style="enable-background: new 0 0 330 330"
+              xml:space="preserve"
+            ><g><path
+                  d="M35,270h45v45c0,8.284,6.716,15,15,15h200c8.284,0,15-6.716,15-15V75c0-8.284-6.716-15-15-15h-45V15
+                c0-8.284-6.716-15-15-15H35c-8.284,0-15,6.716-15,15v240C20,263.284,26.716,270,35,270z M280,300H110V90h170V300z M50,30h170v30H95
+                c-8.284,0-15,6.716-15,15v165H50V30z"
+                /><path
+                  d="M155,120c-8.284,0-15,6.716-15,15s6.716,15,15,15h80c8.284,0,15-6.716,15-15s-6.716-15-15-15H155z"/><path
+                  d="M235,180h-80c-8.284,0-15,6.716-15,15s6.716,15,15,15h80c8.284,0,15-6.716,15-15S243.284,180,235,180z"
+                /><path
+                  d="M235,240h-80c-8.284,0-15,6.716-15,15c0,8.284,6.716,15,15,15h80c8.284,0,15-6.716,15-15C250,246.716,243.284,240,235,240z
+                "
+                /></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g></svg>`;
+
+      function copy(text, callBack) {
+        navigator.clipboard
+          .writeText(text)
+          .then((e) => callBack())
+          .catch((e) => console.log(e));
+      }
+
+      window.onload = () => {
+        setupButtons();
+        // setupMockData();
+      };
+
+      function setupMockData() {
+        const cvv = Math.floor(Math.random() * 899 + 100);
+        document.querySelector(".cvv").innerText = cvv;
+        const today = new Date();
+        today.setDate(today.getDate() + 30);
+
+        const expMonth =
+          today.getMonth().toString().length == 1
+            ? `0${today.getMonth()}`
+            : today.getMonth();
+        const expYear = today.getFullYear() - 2000;
+        document.querySelector(".exp").innerText = `${expMonth}/${expYear}`;
+      }
+      function setupButtons() {
+        const copyButtons = document
+          .querySelectorAll(".copy")
+          .forEach((button) => {
+            button.innerHTML = copyIcon;
+
+            function toggleIcon() {
+              button.innerHTML = checkIcon;
+              window.setTimeout(() => {
+                button.innerHTML = copyIcon;
+              }, 4000);
+            }
+            button.onclick = function (e) {
+              copy(
+                button.parentElement.querySelector("span").innerText,
+                toggleIcon
+              );
+            };
+          });
+      }
+    </script>
+  </body>
+</html>

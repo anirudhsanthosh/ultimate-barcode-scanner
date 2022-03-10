@@ -224,6 +224,15 @@
     };
 
     const scan = () => {
+      if (cordova.platformId == "browser") {
+        ons.notification.toast(
+          "Scanning option is not implemented in web demo, it is  available in android app",
+          {
+            timeout: 5000,
+          }
+        );
+        return;
+      }
       cordova.plugins.barcodeScanner.scan(
         function (result) {
           if (result.cancelled)
@@ -324,11 +333,11 @@
           timeout: 2000,
         });
 
-      if (!ons.platform.isAndroid(true)) {
+      if (cordova.platformId == "browser") {
         ons.notification.toast(
           "Share  option is not implemented in web demo, it is  available in android app",
           {
-            timeout: 50000,
+            timeout: 5000,
           }
         );
         return;
@@ -386,11 +395,11 @@
           timeout: 2000,
         });
 
-      if (!ons.platform.isAndroid(true)) {
+      if (cordova.platformId == "browser") {
         ons.notification.toast(
           "Email option is not implemented in web demo, it is  available in android app",
           {
-            timeout: 50000,
+            timeout: 5000,
           }
         );
         return;
@@ -428,7 +437,7 @@
         return `${ean.title}  ${ean.ean}  ${ean.qnty}`;
       });
       const resultEans = rows.join("\n");
-      if (ons.platform.isAndroid(true))
+      if (cordova.platformId !== "browser")
         cordova.plugins.clipboard.copy(resultEans);
       else copyToClipboard(resultEans);
 
@@ -438,11 +447,11 @@
       closeShare();
     };
     const sharePdf = () => {
-      if (!ons.platform.isAndroid(true)) {
+      if (cordova.platformId == "browser") {
         ons.notification.toast(
           "Share pdf option is not implemented in web demo, it is only available in android app",
           {
-            timeout: 50000,
+            timeout: 5000,
           }
         );
         return;
@@ -500,7 +509,7 @@
       var ws = XLSX.utils.aoa_to_sheet(ws_data);
       wb.Sheets["sheet 1"] = ws;
       var wbout = XLSX.write(wb, { bookType: "xlsx", type: "base64" });
-      if (ons.platform.isAndroid(true))
+      if (cordova.platformId !== "browser")
         window.plugins.socialsharing.share(
           "export",
           `barcodeScanner_${Date.now()}`, //octet-stream
